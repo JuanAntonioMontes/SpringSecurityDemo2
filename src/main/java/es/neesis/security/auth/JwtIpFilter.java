@@ -33,7 +33,7 @@ public class JwtIpFilter extends OncePerRequestFilter {
             return;
         }
         String remoteIp = request.getRemoteAddr();
-
+        System.out.println("IP del cliente: " + remoteIp);
         if (!authorizedIpService.isAuthorized(remoteIp)) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.getWriter().write("Access denied from IP: " + remoteIp);

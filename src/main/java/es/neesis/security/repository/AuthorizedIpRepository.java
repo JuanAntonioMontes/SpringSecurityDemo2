@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface AuthorizedIpRepository extends CrudRepository<AuthorizedIp, Long> {
     List<AuthorizedIp> findAll();
+
+    boolean existsByIpAddress(String ip);
 }
