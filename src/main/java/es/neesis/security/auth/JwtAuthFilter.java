@@ -7,6 +7,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +18,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
+@Order(1)
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Autowired
@@ -37,7 +39,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
             }
         }
-
         String username = null;
         if(token != null){
             username = jwtService.extractUsername(token);

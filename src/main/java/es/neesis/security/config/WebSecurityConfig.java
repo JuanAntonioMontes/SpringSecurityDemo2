@@ -1,6 +1,8 @@
 package es.neesis.security.config;
 
 import es.neesis.security.auth.JwtAuthFilter;
+import es.neesis.security.auth.JwtIpFilter;
+import es.neesis.security.service.AuthorizedIpService;
 import es.neesis.security.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -41,6 +43,9 @@ public class WebSecurityConfig {
     @Autowired
     JwtAuthFilter jwtAuthFilter;
 
+    @Autowired
+    JwtIpFilter jwtIpFilter;
+
     @Bean
     public UserDetailsService userDetailsService() {
         return new UserDetailsServiceImpl();
@@ -54,23 +59,24 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .httpBasic(AbstractHttpConfigurer::disable)
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(authorizeRequests ->
-                    authorizeRequests
-                    .requestMatchers("/api/login").permitAll()
-                    .requestMatchers("/", "/home").permitAll()
-                    .anyRequest().authenticated()
-            )
-            .formLogin(formLogin ->
-                    formLogin
-                            .loginPage("/login")
-                            .permitAll()
-            )
-            .logout(LogoutConfigurer::permitAll
-            );
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authorizeRequests ->
+                        authorizeRequests
+                                .requestMatchers("/api/login").permitAll()
+                                .requestMatchers("/", "/home").permitAll()
+                                .anyRequest().authenticated()
+                )
+                .formLogin(formLogin ->
+                        formLogin
+                                .loginPage("/login")
+                                .permitAll()
+                )
+                .logout(LogoutConfigurer::permitAll
+                );
 
+        http.addFilterBefore(jwtIpFilter, UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

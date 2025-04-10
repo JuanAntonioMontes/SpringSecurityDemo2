@@ -1,8 +1,10 @@
+
 package es.neesis.security.controller;
 
 import es.neesis.security.auth.JwtUtil;
 import es.neesis.security.model.AuthRequestDTO;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,10 +26,12 @@ public class LoginController {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST,
             consumes = "application/x-www-form-urlencoded")
-    public RedirectView login(AuthRequestDTO request, HttpServletResponse response) {
+    public RedirectView login(AuthRequestDTO request, HttpServletRequest httpRequest, HttpServletResponse response) {
         Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
         if(auth.isAuthenticated()){
-            String token = jwtUtil.generateToken(request.getUsername());
+            String ip = httpRequest.getRemoteAddr();
+            String location = "Desconocida";
+            String token = jwtUtil.generateToken(request.getUsername(), ip, location);
             RedirectView redirectView;
             if(auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equalsIgnoreCase("ADMIN")))
                 redirectView = new RedirectView("/private/helloAdmin");

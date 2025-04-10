@@ -1,6 +1,9 @@
 package es.neesis.security.auth;
 
+import es.neesis.security.entities.UserEntity;
+import es.neesis.security.entities.UserRoleEntity;
 import es.neesis.security.model.User;
+import es.neesis.security.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
@@ -8,16 +11,22 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 @Component
 public class JwtUtil {
+
+    @Autowired
+    UserRepository userRepository;
 
     private final String secret_key = "a1O2s3D4f5G6h7J8k9L0zXcVbNmQwErTyUiOpAsDfGhJkLzXcVbNmQwErTyUiOpAsDfGhJkL";
 
@@ -42,8 +51,13 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(String username){
-        Map<String, Object> claims = Map.of();
+    public String generateToken(String username, String ip, String location){
+        UserEntity user = userRepository.findByUsername(username);
+        List<String> roles = user.getRoles().stream().map(UserRoleEntity::getName).toList();
+        Map<String, Object> claims = Map.of(
+                "ip", ip,
+                "location", location,
+                "roles", roles);
         return createToken(claims, username);
     }
 
